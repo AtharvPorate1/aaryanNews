@@ -1,141 +1,145 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Comment, type CommentType } from "./comment"
-import { CommentForm } from "./comment-form"
-import { Separator } from "@/components/ui/separator"
-import { v4 as uuidv4 } from "uuid"
+import { useState, useEffect } from "react";
+import { Comment, type CommentType } from "./comment";
+import { CommentForm } from "./comment-form";
+import { Separator } from "@/components/ui/separator";
+import { v4 as uuidv4 } from "uuid";
+import { useUser } from "@clerk/nextjs";
 
 interface CommentSectionProps {
-  articleId: string
+  articleId: string;
+}
+
+interface UserData {
+  id: string;
+  fullName: string | null;
+  primaryEmailAddress: {
+    emailAddress: string;
+  };
 }
 
 export function CommentSection({ articleId }: CommentSectionProps) {
-  const [comments, setComments] = useState<CommentType[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [comments, setComments] = useState<CommentType[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [organizedComments, setOrganizedComments] = useState<any>([]);
 
-  // Load comments from localStorage on mount
+  const { isLoaded, isSignedIn, user } = useUser();
+  const id = user?.id || "";
+  const fullName = user?.fullName || "";
+  const emailAddress = user?.primaryEmailAddress?.emailAddress || "";
+
+  const fetchComments = async () => {
+    const response = await fetch(`/api/comments/${articleId}`);
+    const { comments } = await response.json();
+    setComments(comments);
+    setIsLoading(false);
+  };
+
   useEffect(() => {
-    const loadComments = () => {
-      if (typeof window !== "undefined") {
-        const savedComments = localStorage.getItem(`comments-${articleId}`)
-        if (savedComments) {
-          setComments(JSON.parse(savedComments))
-        }
-        setIsLoading(false)
-      }
-    }
+    fetchComments();
+  }, [articleId]);
 
-    loadComments()
-  }, [articleId])
-
-  // Save comments to localStorage whenever they change
-  useEffect(() => {
-    if (typeof window !== "undefined" && !isLoading) {
-      localStorage.setItem(`comments-${articleId}`, JSON.stringify(comments))
-    }
-  }, [comments, articleId, isLoading])
-
-  // Function to organize comments into a tree structure
   const organizeComments = (flatComments: CommentType[]): CommentType[] => {
-    const commentMap: Record<string, CommentType> = {}
-    const rootComments: CommentType[] = []
+    const commentMap: Record<string, CommentType> = {};
+    const rootComments: CommentType[] = [];
 
     // First pass: create a map of all comments by ID
     flatComments.forEach((comment) => {
       commentMap[comment.id] = {
         ...comment,
         replies: [],
-      }
-    })
+      };
+    });
 
     // Second pass: organize into parent-child relationships
     flatComments.forEach((comment) => {
       if (comment.parentId) {
         // This is a reply, add it to its parent's replies
         if (commentMap[comment.parentId]) {
-          commentMap[comment.parentId].replies!.push(commentMap[comment.id])
+          commentMap[comment.parentId].replies!.push(commentMap[comment.id]);
         }
       } else {
         // This is a root comment
-        rootComments.push(commentMap[comment.id])
+        rootComments.push(commentMap[comment.id]);
       }
-    })
+    });
 
     // Sort root comments by creation date (newest first)
-    return rootComments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-  }
+    return rootComments.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  };
 
-  const handleAddComment = (author: string, content: string) => {
-    const newComment: CommentType = {
-      id: uuidv4(),
-      author,
+  const handleAddComment = async (author: string, content: string) => {
+    const newComment = {
+      author:fullName,
       content,
       createdAt: new Date().toISOString(),
       upvotes: 0,
       downvotes: 0,
       userVote: null,
       parentId: null,
-      replies: [],
+    };
+
+    const response = await fetch(`/api/comments/${articleId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newComment),
+    });
+
+    if (response.ok) {
+      const { comment } = await response.json();
+      setComments(comment);
     }
+  };
 
-    setComments((prev) => [newComment, ...prev])
-  }
-
-  const handleAddReply = (parentId: string, author: string, content: string) => {
-    const newReply: CommentType = {
-      id: uuidv4(),
-      author,
+  const handleAddReply = async (
+    parentId: string,
+    author: string,
+    content: string
+  ) => {
+    const newReply = {
+      parentId,
+      author:fullName,
       content,
       createdAt: new Date().toISOString(),
       upvotes: 0,
       downvotes: 0,
       userVote: null,
-      parentId,
+    };
+
+    const response = await fetch(`/api/comments/${articleId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newReply),
+    });
+
+    if (response.ok) {
+      const { reply } = await response.json();
+
+      setComments(reply);
     }
+  };
 
-    setComments((prev) => [...prev, newReply])
-  }
+  const handleVote = async (id: string, direction: "up" | "down") => {
+    const response = await fetch(`/api/comments/${articleId}/vote`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ commentId: id, direction }),
+    });
 
-  const handleVote = (id: string, direction: "up" | "down") => {
-    setComments((prev) =>
-      prev.map((comment) => {
-        if (comment.id === id) {
-          // If user already voted the same way, remove the vote
-          if (comment.userVote === direction) {
-            return {
-              ...comment,
-              upvotes: direction === "up" ? comment.upvotes - 1 : comment.upvotes,
-              downvotes: direction === "down" ? comment.downvotes - 1 : comment.downvotes,
-              userVote: null,
-            }
-          }
+    if (response.ok) {
+      const { comments } = await response.json();
+      setComments(comments);
+    }
+  };
 
-          // If user voted the opposite way, switch the vote
-          if (comment.userVote) {
-            return {
-              ...comment,
-              upvotes: direction === "up" ? comment.upvotes + 1 : comment.upvotes - 1,
-              downvotes: direction === "down" ? comment.downvotes + 1 : comment.downvotes - 1,
-              userVote: direction,
-            }
-          }
-
-          // If user hasn't voted yet
-          return {
-            ...comment,
-            upvotes: direction === "up" ? comment.upvotes + 1 : comment.upvotes,
-            downvotes: direction === "down" ? comment.downvotes + 1 : comment.downvotes,
-            userVote: direction,
-          }
-        }
-        return comment
-      }),
-    )
-  }
-
-  // Organize comments into a tree structure
-  const organizedComments = organizeComments(comments)
+  useEffect(() => {
+    const flattenComments = organizeComments(comments);
+    setOrganizedComments(flattenComments);
+  }, [comments]);
 
   return (
     <section className="mt-12">
@@ -151,19 +155,24 @@ export function CommentSection({ articleId }: CommentSectionProps) {
         </div>
       ) : organizedComments.length > 0 ? (
         <div className="space-y-4">
-          {organizedComments.map((comment) => (
+          {organizedComments.map((comment: any) => (
             <div key={comment.id} className="mb-6">
-              <Comment comment={comment} onVote={handleVote} onReply={handleAddReply} />
+              <Comment
+                comment={comment}
+                onVote={handleVote}
+                onReply={handleAddReply}
+              />
               <Separator className="mt-4" />
             </div>
           ))}
         </div>
       ) : (
         <div className="py-8 text-center">
-          <p className="text-muted-foreground">No comments yet. Be the first to comment!</p>
+          <p className="text-muted-foreground">
+            No comments yet. Be the first to comment!
+          </p>
         </div>
       )}
     </section>
-  )
+  );
 }
-

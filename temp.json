@@ -1,0 +1,114 @@
+{
+    "id": "user_2v5tzzF5ZvAsYFizC3pKMlwTuzd",
+    "pathRoot": "/me",
+    "externalId": null,
+    "username": null,
+    "emailAddresses": [
+        {
+            "id": "idn_2v5tzCXM3AZPw34KMO2KFuk6hXv",
+            "pathRoot": "/me/email_addresses",
+            "emailAddress": "ethicalprogrammer420@gmail.com",
+            "matchesSsoConnection": false,
+            "linkedTo": [
+                {
+                    "id": "idn_2v5tzFcJ9rbagwuMzEVlPKIsJDI",
+                    "pathRoot": "",
+                    "type": "oauth_google"
+                }
+            ],
+            "verification": {
+                "pathRoot": "",
+                "status": "verified",
+                "strategy": "from_oauth_google",
+                "nonce": null,
+                "message": null,
+                "externalVerificationRedirectURL": null,
+                "attempts": null,
+                "expireAt": "2025-03-31T18:50:28.448Z",
+                "error": null
+            }
+        }
+    ],
+    "phoneNumbers": [],
+    "web3Wallets": [],
+    "externalAccounts": [
+        {
+            "id": "eac_2v5tz8TQsw6SdtHftMmycMtlNtR",
+            "pathRoot": "/me/external_accounts",
+            "identificationId": "idn_2v5tzFcJ9rbagwuMzEVlPKIsJDI",
+            "provider": "google",
+            "providerUserId": "112823412745886429189",
+            "emailAddress": "ethicalprogrammer420@gmail.com",
+            "approvedScopes": "email https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile openid profile",
+            "firstName": "Varun",
+            "lastName": "",
+            "imageUrl": "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NJa1RTUVR5M3llVi1zNXFyeE10RGxUU3laRnYxMXMwaU5yMGhiRzRUUm83UzVCcmc9czEwMDAtYyIsInMiOiJpbUxnTTNzdFZqR2U1VEgwb01HR3lYcTZYUWZNUXpSY2UzeDBvWmVSdDFJIn0",
+            "username": null,
+            "publicMetadata": {},
+            "label": null,
+            "verification": {
+                "pathRoot": "",
+                "status": "verified",
+                "strategy": "oauth_google",
+                "nonce": null,
+                "message": null,
+                "externalVerificationRedirectURL": null,
+                "attempts": null,
+                "expireAt": "2025-03-31T19:00:17.557Z",
+                "error": null
+            }
+        }
+    ],
+    "enterpriseAccounts": [],
+    "passkeys": [],
+    "samlAccounts": [],
+    "organizationMemberships": [],
+    "passwordEnabled": false,
+    "firstName": "Varun",
+    "lastName": null,
+    "fullName": "Varun",
+    "primaryEmailAddressId": "idn_2v5tzCXM3AZPw34KMO2KFuk6hXv",
+    "primaryEmailAddress": {
+        "id": "idn_2v5tzCXM3AZPw34KMO2KFuk6hXv",
+        "pathRoot": "/me/email_addresses",
+        "emailAddress": "ethicalprogrammer420@gmail.com",
+        "matchesSsoConnection": false,
+        "linkedTo": [
+            {
+                "id": "idn_2v5tzFcJ9rbagwuMzEVlPKIsJDI",
+                "pathRoot": "",
+                "type": "oauth_google"
+            }
+        ],
+        "verification": {
+            "pathRoot": "",
+            "status": "verified",
+            "strategy": "from_oauth_google",
+            "nonce": null,
+            "message": null,
+            "externalVerificationRedirectURL": null,
+            "attempts": null,
+            "expireAt": "2025-03-31T18:50:28.448Z",
+            "error": null
+        }
+    },
+    "primaryPhoneNumberId": null,
+    "primaryPhoneNumber": null,
+    "primaryWeb3WalletId": null,
+    "primaryWeb3Wallet": null,
+    "imageUrl": "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ29vZ2xlL2ltZ18ydjV0enlWTFRkNnowbzQyV2Vwd2pSOFk0Q0wifQ",
+    "hasImage": true,
+    "twoFactorEnabled": false,
+    "totpEnabled": false,
+    "backupCodeEnabled": false,
+    "publicMetadata": {},
+    "unsafeMetadata": {},
+    "createOrganizationEnabled": true,
+    "createOrganizationsLimit": null,
+    "deleteSelfEnabled": true,
+    "lastSignInAt": "2025-03-31T18:50:28.245Z",
+    "legalAcceptedAt": null,
+    "updatedAt": "2025-03-31T18:50:28.256Z",
+    "createdAt": "2025-03-31T18:50:28.229Z",
+    "cachedSessionsWithActivities": null
+}

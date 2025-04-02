@@ -63,6 +63,15 @@ export function MainNav() {
           >
             Fact Check
           </Link>
+          <Link
+            href="/leaderboard"
+            className={cn(
+              "transition-colors hover:text-foreground/80",
+              pathname?.startsWith("/leaderboard") ? "text-foreground font-medium" : "text-foreground/60",
+            )}
+          >
+            LeaderBoard
+          </Link>
         </nav>
       </div>
       <div className="flex items-center gap-4">

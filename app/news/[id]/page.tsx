@@ -19,7 +19,8 @@ export async function generateStaticParams() {
 }
 
 export default async function ArticlePage({ params }: { params: { id: string } }) {
-  const decodedTitle = decodeURIComponent(params.id)
+  const {id} = await params;
+  const decodedTitle = decodeURIComponent(id)
   const article = await getArticleByTitle(decodedTitle)
 
   if (!article) {
@@ -103,7 +104,7 @@ export default async function ArticlePage({ params }: { params: { id: string } }
         <Separator className="my-12" />
 
         {/* Comment Section */}
-        <CommentSection articleId={params.id} />
+        <CommentSection articleId={id} />
       </article>
 
       <Separator className="my-16" />
