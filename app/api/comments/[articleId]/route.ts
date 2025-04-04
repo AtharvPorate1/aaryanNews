@@ -1,4 +1,3 @@
-import { readCommentsByArticle, addComment, addReply, updateVote } from "@/lib/db/services/commentService";
 import { NextResponse } from "next/server";
 import {connectToDb} from '@/lib/db/dbconfig'
 import Comment from '@/lib/db/models/comment'
