@@ -62,16 +62,16 @@ export default function ProfilePage() {
  const fetchComments = async () => {
     // console.log('Fetching comments for ', user?.fullName);
     
-    const response = await fetch(`/api/comments/${user?.fullName}`);
+    const response = await fetch(`/api/profileComments/${user?.fullName}`);
     const { comments } = await response.json();
     
     setUserComments(comments);
   };
 
   const getTotalUpvotes = () => {
-    return userComments.reduce((sum: number, comment: any) => {
+    return userComments?.reduce((sum: number, comment: any) => {
       return sum + (comment.upvotes || 0);
-    }, 0);
+    }, 0) || 0;
   };
 
   useEffect(()=>{
@@ -129,7 +129,7 @@ export default function ProfilePage() {
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div className="flex items-center gap-2">
                     <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                    <span>{userComments.length} Comments</span>
+                    <span>{userComments?.length || 0} Comments</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <ThumbsUp className="h-4 w-4 text-muted-foreground" />
@@ -155,7 +155,7 @@ export default function ProfilePage() {
 
             <TabsContent value="comments">
               <div className="space-y-4">
-                {userComments.map((comment:any) => (
+                {userComments && userComments.length > 0 && userComments.map((comment:any) => (
                   <Card key={comment._id}>
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-start">

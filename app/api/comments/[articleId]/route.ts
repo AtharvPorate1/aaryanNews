@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
-import {connectToDb} from '@/lib/db/dbconfig'
-import Comment from '@/lib/db/models/comment'
+import { connectToDb } from "@/lib/db/dbconfig";
+import Comment from "@/lib/db/models/comment";
 
+connectToDb();
 
-connectToDb()
-
-export async function POST(req:any, { params }:any) {
+export async function POST(req: any, { params }: any) {
   try {
     const { articleId } = await params;
     const { parentId, author, content } = await req.json();
@@ -23,9 +22,12 @@ export async function POST(req:any, { params }:any) {
       };
 
       // const addedReply = addReply(articleId, parentId, newReply);
-      const addedReply = await Comment.create(newReply)
+      const addedReply = await Comment.create(newReply);
       if (!addedReply) {
-        return NextResponse.json({ success: false, error: "Parent comment not found" }, { status: 404 });
+        return NextResponse.json(
+          { success: false, error: "Parent comment not found" },
+          { status: 404 }
+        );
       }
     } else {
       const newComment = {
@@ -42,28 +44,39 @@ export async function POST(req:any, { params }:any) {
       const addedComment = await Comment.create(newComment);
     }
 
-    const allComments = await Comment.find({articleId:articleId});
-    return NextResponse.json({ success: true, comments: allComments }, { status: 201 });
-  } catch (error:any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    const allComments = await Comment.find({ articleId: articleId });
+    return NextResponse.json(
+      { success: true, comments: allComments },
+      { status: 201 }
+    );
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
   }
 }
 
+export async function GET(req: any, { params }: any) {
+  try {
+    const { articleId } = await params;
 
-export async function GET(req:any, { params }:any) {
-    try {
-
-      const { articleId } = await params;
-     
-      const comments = await Comment.find({articleId:articleId});
-      if (!comments) {
-        return NextResponse.json({ success: false, error: "Comment not found" }, { status: 404 });
-      }
-
-      
-  
-      return NextResponse.json({ success: true, comments: comments }, { status: 200 });
-    } catch (error:any) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    const comments = await Comment.find({ articleId: articleId });
+    if (!comments) {
+      return NextResponse.json(
+        { success: false, error: "Comment not found" },
+        { status: 404 }
+      );
     }
+
+    return NextResponse.json(
+      { success: true, comments: comments },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
   }
+}

@@ -15,7 +15,7 @@ export async function GET(req:any, { params }:any) {
       }
       
      
-      const comments = await Comment.find(author);
+      const comments = await Comment.find({author});
       if (!comments) {
         return NextResponse.json({ success: false, error: "Comment not found" }, { status: 404 });
       }
