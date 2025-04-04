@@ -8,53 +8,79 @@ import { Separator } from "@/components/ui/separator"
 import { CalendarDays, Mail, MessageSquare, ThumbsUp } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { useEffect, useState } from "react"
 
 // Placeholder data for user comments
-const userComments = [
-  {
-    id: 1,
-    article: "Why Electric Vehicles Are the Future of Transportation",
-    category: "Technology",
-    comment:
-      "I've been driving an EV for two years now and completely agree with this article. The charging infrastructure has improved dramatically in my area.",
-    date: "2 days ago",
-    likes: 14,
-    replies: 3,
-  },
-  {
-    id: 2,
-    article: "Global Markets React to Interest Rate Changes",
-    category: "Business",
-    comment:
-      "This analysis misses some key factors about how emerging markets are responding differently this time. The situation in Southeast Asia is particularly interesting.",
-    date: "1 week ago",
-    likes: 27,
-    replies: 8,
-  },
-  {
-    id: 3,
-    article: "New Study Reveals Benefits of Intermittent Fasting",
-    category: "Health",
-    comment:
-      "I've been practicing 16:8 intermittent fasting for months now. While I've seen some of the benefits mentioned, I think the article overstates the weight loss effects.",
-    date: "2 weeks ago",
-    likes: 9,
-    replies: 5,
-  },
-  {
-    id: 4,
-    article: "Fact Check: Viral Social Media Post About Climate Change",
-    category: "Fact Check",
-    comment:
-      "Thank you for this thorough fact check. I've seen this misinformation shared by several friends and now I can point them to this article.",
-    date: "3 weeks ago",
-    likes: 32,
-    replies: 0,
-  },
-]
+// const userComments = [
+//   {
+//     id: 1,
+//     article: "Why Electric Vehicles Are the Future of Transportation",
+//     category: "Technology",
+//     comment:
+//       "I've been driving an EV for two years now and completely agree with this article. The charging infrastructure has improved dramatically in my area.",
+//     date: "2 days ago",
+//     likes: 14,
+//     replies: 3,
+//   },
+//   {
+//     id: 2,
+//     article: "Global Markets React to Interest Rate Changes",
+//     category: "Business",
+//     comment:
+//       "This analysis misses some key factors about how emerging markets are responding differently this time. The situation in Southeast Asia is particularly interesting.",
+//     date: "1 week ago",
+//     likes: 27,
+//     replies: 8,
+//   },
+//   {
+//     id: 3,
+//     article: "New Study Reveals Benefits of Intermittent Fasting",
+//     category: "Health",
+//     comment:
+//       "I've been practicing 16:8 intermittent fasting for months now. While I've seen some of the benefits mentioned, I think the article overstates the weight loss effects.",
+//     date: "2 weeks ago",
+//     likes: 9,
+//     replies: 5,
+//   },
+//   {
+//     id: 4,
+//     article: "Fact Check: Viral Social Media Post About Climate Change",
+//     category: "Fact Check",
+//     comment:
+//       "Thank you for this thorough fact check. I've seen this misinformation shared by several friends and now I can point them to this article.",
+//     date: "3 weeks ago",
+//     likes: 32,
+//     replies: 0,
+//   },
+// ]
 
 export default function ProfilePage() {
   const { user, isLoaded } = useUser()
+  const [userComments, setUserComments] = useState<any>([])
+
+
+ const fetchComments = async () => {
+    // console.log('Fetching comments for ', user?.fullName);
+    
+    const response = await fetch(`/api/comments/${user?.fullName}`);
+    const { comments } = await response.json();
+    
+    setUserComments(comments);
+  };
+
+  const getTotalUpvotes = () => {
+    return userComments.reduce((sum: number, comment: any) => {
+      return sum + (comment.upvotes || 0);
+    }, 0);
+  };
+
+  useEffect(()=>{
+    if(user?.fullName){
+      fetchComments()
+    }
+  },[user?.fullName])
+
+
 
   if (!isLoaded) {
     return <div className="flex justify-center items-center min-h-[60vh]">Loading...</div>
@@ -107,7 +133,7 @@ export default function ProfilePage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <ThumbsUp className="h-4 w-4 text-muted-foreground" />
-                    <span>82 Likes</span>
+                    <span>{getTotalUpvotes()}</span>
                   </div>
                 </div>
               </div>
@@ -129,29 +155,29 @@ export default function ProfilePage() {
 
             <TabsContent value="comments">
               <div className="space-y-4">
-                {userComments.map((comment) => (
-                  <Card key={comment.id}>
+                {userComments.map((comment:any) => (
+                  <Card key={comment._id}>
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-start">
                         <div>
-                          <CardTitle className="text-base">{comment.article}</CardTitle>
+                          <CardTitle className="text-base">{comment.articleId}</CardTitle>
                           <CardDescription className="flex items-center gap-1">
-                            <Badge variant="outline">{comment.category}</Badge>
+                            {/* <Badge variant="outline">{comment.category}</Badge> */}
                             <span className="text-xs text-muted-foreground">{comment.date}</span>
                           </CardDescription>
                         </div>
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm">{comment.comment}</p>
+                      <p className="text-sm">{comment.content}</p>
                       <div className="flex items-center gap-4 mt-3">
                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
                           <ThumbsUp className="h-3.5 w-3.5" />
-                          <span>{comment.likes} likes</span>
+                          <span>{comment.upvotes} likes</span>
                         </div>
                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
                           <MessageSquare className="h-3.5 w-3.5" />
-                          <span>{comment.replies} replies</span>
+                          <span>{Math.floor(Math.random() * 10)} replies</span>
                         </div>
                       </div>
                     </CardContent>

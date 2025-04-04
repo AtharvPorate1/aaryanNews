@@ -1,7 +1,10 @@
-import { readCommentsByArticle, addComment, addReply, updateVote } from "@/lib/db";
+import { readCommentsByArticle, addComment, addReply, updateVote } from "@/lib/db/services/commentService";
 import { NextResponse } from "next/server";
+import {connectToDb} from '@/lib/db/dbconfig'
+import Comment from '@/lib/db/models/comment'
 
 
+connectToDb()
 
 export async function POST(req:any, { params }:any) {
   try {
@@ -11,6 +14,7 @@ export async function POST(req:any, { params }:any) {
     if (parentId) {
       const newReply = {
         author,
+        articleId,
         content,
         createdAt: new Date().toISOString(),
         upvotes: 0,
@@ -19,15 +23,15 @@ export async function POST(req:any, { params }:any) {
         parentId,
       };
 
-      const addedReply = addReply(articleId, parentId, newReply);
+      // const addedReply = addReply(articleId, parentId, newReply);
+      const addedReply = await Comment.create(newReply)
       if (!addedReply) {
         return NextResponse.json({ success: false, error: "Parent comment not found" }, { status: 404 });
       }
-
-      return NextResponse.json({ success: true, reply: addedReply }, { status: 201 });
     } else {
       const newComment = {
         author,
+        articleId,
         content,
         createdAt: new Date().toISOString(),
         upvotes: 0,
@@ -36,42 +40,28 @@ export async function POST(req:any, { params }:any) {
         parentId: null,
       };
 
-      const addedComment = addComment(articleId, newComment);
-      return NextResponse.json({ success: true, comment: addedComment }, { status: 201 });
+      const addedComment = await Comment.create(newComment);
     }
+
+    const allComments = await Comment.find({articleId:articleId});
+    return NextResponse.json({ success: true, comments: allComments }, { status: 201 });
   } catch (error:any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
 
 
-export async function PATCH(req:any, { params }:any) {
-    try {
-
-      const { articleId } = await params;
-      const { commentId, direction } = await req.json();
-
-  
-      const updatedComments = updateVote(articleId, commentId, direction);
-      if (!updatedComments) {
-        return NextResponse.json({ success: false, error: "Comment not found" }, { status: 404 });
-      }
-  
-      return NextResponse.json({ success: true, comments: updatedComments }, { status: 200 });
-    } catch (error:any) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-    }
-  }
-
 export async function GET(req:any, { params }:any) {
     try {
 
       const { articleId } = await params;
      
-      const comments = readCommentsByArticle(articleId);
+      const comments = await Comment.find({articleId:articleId});
       if (!comments) {
         return NextResponse.json({ success: false, error: "Comment not found" }, { status: 404 });
       }
+
+      
   
       return NextResponse.json({ success: true, comments: comments }, { status: 200 });
     } catch (error:any) {

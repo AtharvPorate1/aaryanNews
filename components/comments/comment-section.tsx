@@ -32,6 +32,7 @@ export function CommentSection({ articleId }: CommentSectionProps) {
   const fetchComments = async () => {
     const response = await fetch(`/api/comments/${articleId}`);
     const { comments } = await response.json();
+    
     setComments(comments);
     setIsLoading(false);
   };
@@ -44,24 +45,25 @@ export function CommentSection({ articleId }: CommentSectionProps) {
     const commentMap: Record<string, CommentType> = {};
     const rootComments: CommentType[] = [];
 
+    
     // First pass: create a map of all comments by ID
-    flatComments.forEach((comment) => {
-      commentMap[comment.id] = {
+    flatComments.forEach((comment:any) => {
+      commentMap[comment._id] = {
         ...comment,
         replies: [],
       };
     });
 
     // Second pass: organize into parent-child relationships
-    flatComments.forEach((comment) => {
+    flatComments.forEach((comment:any) => {
       if (comment.parentId) {
         // This is a reply, add it to its parent's replies
         if (commentMap[comment.parentId]) {
-          commentMap[comment.parentId].replies!.push(commentMap[comment.id]);
+          commentMap[comment.parentId].replies!.push(commentMap[comment._id]);
         }
       } else {
         // This is a root comment
-        rootComments.push(commentMap[comment.id]);
+        rootComments.push(commentMap[comment._id]);
       }
     });
 
@@ -90,8 +92,10 @@ export function CommentSection({ articleId }: CommentSectionProps) {
     });
 
     if (response.ok) {
-      const { comment } = await response.json();
-      setComments(comment);
+      const { comments } = await response.json();
+
+      
+      setComments(comments);
     }
   };
 
@@ -100,6 +104,7 @@ export function CommentSection({ articleId }: CommentSectionProps) {
     author: string,
     content: string
   ) => {
+    
     const newReply = {
       parentId,
       author:fullName,
@@ -117,9 +122,8 @@ export function CommentSection({ articleId }: CommentSectionProps) {
     });
 
     if (response.ok) {
-      const { reply } = await response.json();
-
-      setComments(reply);
+      const { comments } = await response.json();
+      setComments(comments);
     }
   };
 
@@ -132,6 +136,7 @@ export function CommentSection({ articleId }: CommentSectionProps) {
 
     if (response.ok) {
       const { comments } = await response.json();
+      
       setComments(comments);
     }
   };
@@ -156,7 +161,7 @@ export function CommentSection({ articleId }: CommentSectionProps) {
       ) : organizedComments.length > 0 ? (
         <div className="space-y-4">
           {organizedComments.map((comment: any) => (
-            <div key={comment.id} className="mb-6">
+            <div key={comment._id} className="mb-6">
               <Comment
                 comment={comment}
                 onVote={handleVote}

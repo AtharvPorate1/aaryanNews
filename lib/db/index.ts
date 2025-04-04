@@ -70,7 +70,7 @@ export const updateVote = (articleId:any, commentId:any, direction:any) => {
     // Find the comment or reply recursively
     const findAndUpdateVote = (comments:any) => {
       for (let comment of comments) {
-        if (comment.id === commentId) {
+        if (comment._id === commentId) {
           if (comment.userVote === direction) {
             // Remove the vote if user clicks the same button again
             if (direction === "up") comment.upvotes--;

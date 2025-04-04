@@ -9,13 +9,13 @@ import { cn } from "@/lib/utils"
 import { ReplyForm } from "./reply-form"
 
 export interface CommentType {
-  id: string
+  _id: string
   author: string
   content: string
   createdAt: string
   upvotes: number
   downvotes: number
-  userVote?: "up" | "down" | null
+  uservote?: "up" | "down" | null
   parentId?: string | null
   replies?: CommentType[]
 }
@@ -37,12 +37,13 @@ export function Comment({ comment, onVote, onReply, depth = 0, maxDepth = 5 }: C
 
   const handleVote = (direction: "up" | "down") => {
     setIsVoting(true)
-    onVote(comment.id, direction)
+    onVote(comment._id, direction)
     setTimeout(() => setIsVoting(false), 300)
   }
 
   const handleReplySubmit = (author: string, content: string) => {
-    onReply(comment.id, author, content)
+    const parentId = comment._id
+    onReply(parentId, author, content)
     setShowReplyForm(false)
   }
 
@@ -87,12 +88,12 @@ export function Comment({ comment, onVote, onReply, depth = 0, maxDepth = 5 }: C
               <Button
                 variant="ghost"
                 size="sm"
-                className={cn("h-8 px-2 text-xs gap-1", comment.userVote === "up" && "text-primary font-medium")}
+                className={cn("h-8 px-2 text-xs gap-1", comment.uservote === "up" && "text-primary font-medium")}
                 onClick={() => handleVote("up")}
                 disabled={isVoting}
               >
                 <ThumbsUp
-                  className={cn("h-4 w-4", comment.userVote === "up" && "fill-primary", isVoting && "animate-ping")}
+                  className={cn("h-4 w-4", comment.uservote === "up" && "fill-primary", isVoting && "animate-ping")}
                 />
                 <span>{comment.upvotes}</span>
               </Button>
@@ -100,14 +101,14 @@ export function Comment({ comment, onVote, onReply, depth = 0, maxDepth = 5 }: C
               <Button
                 variant="ghost"
                 size="sm"
-                className={cn("h-8 px-2 text-xs gap-1", comment.userVote === "down" && "text-destructive font-medium")}
+                className={cn("h-8 px-2 text-xs gap-1", comment.uservote === "down" && "text-destructive font-medium")}
                 onClick={() => handleVote("down")}
                 disabled={isVoting}
               >
                 <ThumbsDown
                   className={cn(
                     "h-4 w-4",
-                    comment.userVote === "down" && "fill-destructive",
+                    comment.uservote === "down" && "fill-destructive",
                     isVoting && "animate-ping",
                   )}
                 />
@@ -152,7 +153,7 @@ export function Comment({ comment, onVote, onReply, depth = 0, maxDepth = 5 }: C
       {hasReplies && showReplies && depth < maxDepth && (
         <div className="mt-1 mb-2">
           {comment.replies!.map((reply) => (
-            <div key={reply.id}>
+            <div key={reply._id}>
               <Comment comment={reply} onVote={onVote} onReply={onReply} depth={depth + 1} maxDepth={maxDepth} />
             </div>
           ))}
