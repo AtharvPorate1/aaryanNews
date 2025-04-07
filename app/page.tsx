@@ -59,12 +59,12 @@ export default async function Home() {
       <Tabs defaultValue="all" className="mb-8">
         <div className="flex items-center justify-between">
           <h2 className="text-3xl font-bold">Latest News</h2>
-          <TabsList>
+          {/* <TabsList>
             <TabsTrigger value="all">All</TabsTrigger>
             <TabsTrigger value="world">World</TabsTrigger>
             <TabsTrigger value="business">Business</TabsTrigger>
             <TabsTrigger value="tech">Tech</TabsTrigger>
-          </TabsList>
+          </TabsList> */}
         </div>
 
         <TabsContent value="all" className="mt-6">

@@ -5,6 +5,7 @@ import { MainNav } from "@/components/main-nav"
 import { ModeToggle } from "@/components/mode-toggle"
 import { Search } from "@/components/search"
 import { ClerkProvider } from "@clerk/nextjs"
+import { Footer } from "@/components/footer"
 // import { Toaster } from "@/components/ui/toaster"
 
 export const metadata = {
@@ -33,9 +34,10 @@ export default function RootLayout({
               </div>
             </header>
             <main className="flex-1">{children}</main>
-            
+            <Footer/>
           </div>
           {/* <Toaster /> */}
+         
         </ThemeProvider>
       </body>
     </html>
