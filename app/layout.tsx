@@ -8,7 +8,7 @@ import { ClerkProvider } from "@clerk/nextjs"
 // import { Toaster } from "@/components/ui/toaster"
 
 export const metadata = {
-  title: "NewsFlash",
+  title: "Veracity Terminal",
   description: "Latest news from around the world",
 }
 

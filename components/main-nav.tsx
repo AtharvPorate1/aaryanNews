@@ -15,7 +15,7 @@ export function MainNav() {
       <div className="flex items-center">
         <Link href="/" className="mr-6 flex items-center space-x-2">
           <Newspaper className="h-6 w-6 text-primary" />
-          <span className="hidden font-bold sm:inline-block">NewsFlash</span>
+          <span className="hidden font-bold sm:inline-block">Veracity Terminal</span>
         </Link>
         <nav className="flex items-center gap-6 text-sm">
           <Link
