@@ -57,7 +57,7 @@ export function MainNav() {
           <Link
             href="/fact-check"
             className={cn(
-              "transition-colors hover:text-foreground/80",
+              "transition-colors hover:text-foreground/80 bg-red-500 p-2 rounded-md ",
               pathname?.startsWith("/fact-check") ? "text-foreground font-medium" : "text-foreground/60",
             )}
           >
