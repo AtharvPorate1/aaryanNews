@@ -47,7 +47,7 @@ export default async function Home() {
               </p>
               <Link
                 href={`/news/${encodeURIComponent(featuredArticle.title)}`}
-                className="ml-auto text-white bg-primary hover:bg-primary/90 px-4 py-2 rounded-md transition-colors"
+                className="ml-auto text-white bg-blue-500 hover:bg-primary/90 px-4 py-2 rounded-md transition-colors"
               >
                 Read More
               </Link>

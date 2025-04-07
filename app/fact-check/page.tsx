@@ -28,54 +28,48 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { factCheck } from "@/lib/api";
 
-// Mock function to simulate fact checking
-// In a real application, this would call an API or use an AI model
-function simulateFactCheck(title: string, author: string, description: string) {
-  return factCheck(title, author, description).then((response) => {
-    if (!response) {
-      throw new Error("No response from fact check API");
+// Function to call OpenAI API for fact checking
+async function factCheckWithOpenAI(title: string, author: string, description: string) {
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4-turbo",
+        messages: [
+          {
+            role: "system",
+            content: "You are a fact checking assistant. Evaluate the accuracy of the news article provided. Return a JSON response with the following properties: prediction (between 0 and 1, where 0 is completely true and 1 is completely false), message (detailed reasoning for your evaluation, include specific claims you checked and what sources would verify or contradict them), indicators (array of misinformation red flags found if any), relatedFacts (array of verified related facts)."
+          },
+          {
+            role: "user",
+            content: `Please fact check this news article:\nTitle: ${title}\nAuthor: ${author}\nContent: ${description}`
+          }
+        ],
+        response_format: { type: "json_object" }
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status}`);
     }
-    const fakeConfidence = Number(response.prediction) || 0;
-    const truthScore = Math.round((1 - fakeConfidence) * 100);
 
-    let verdict = "";
-    let icon = null;
-    let color = "";
-    if (truthScore >= 80) {
-      verdict = "Likely True";
-      icon = <CheckCircle2 className="h-6 w-6 text-green-500" />;
-      color = "bg-green-500";
-    } else if (truthScore >= 60) {
-      verdict = "Partially True";
-      icon = <Info className="h-6 w-6 text-blue-500" />;
-      color = "bg-blue-500";
-    } else if (truthScore >= 40) {
-      verdict = "Unverified";
-      icon = <Clock className="h-6 w-6 text-yellow-500" />;
-      color = "bg-yellow-500";
-    } else if (truthScore >= 20) {
-      verdict = "Misleading";
-      icon = <AlertTriangle className="h-6 w-6 text-orange-500" />;
-      color = "bg-orange-500";
-    } else {
-      verdict = "Likely False";
-      icon = <XCircle className="h-6 w-6 text-red-500" />;
-      color = "bg-red-500";
-    }
-    const reasoning = response.message || "";
-
+    const data = await response.json();
+    const factCheckResult = JSON.parse(data.choices[0].message.content);
+    return factCheckResult;
+  } catch (error) {
+    console.error("Error calling OpenAI API:", error);
     return {
-      verdict,
-      truthScore,
-      reasoning,
-      relatedFacts: [],
-      icon,
-      color,
-      indicatorsFound: [],
+      prediction: 0.5,
+      message: "Unable to verify this content due to an API error. Please try again later.",
+      indicators: [],
+      relatedFacts: []
     };
-  });
+  }
 }
 
 export default function FactCheckPage() {
@@ -92,7 +86,46 @@ export default function FactCheckPage() {
 
     setIsChecking(true);
     try {
-      const checkResult = await simulateFactCheck(title, author, description);
+      const apiResponse = await factCheckWithOpenAI(title, author, description);
+      
+      const fakeConfidence = Number(apiResponse.prediction) || 0.5;
+      const truthScore = Math.round((1 - fakeConfidence) * 100);
+
+      let verdict = "";
+      let icon = null;
+      let color = "";
+      if (truthScore >= 80) {
+        verdict = "Likely True";
+        icon = <CheckCircle2 className="h-6 w-6 text-green-500" />;
+        color = "bg-green-500";
+      } else if (truthScore >= 60) {
+        verdict = "Partially True";
+        icon = <Info className="h-6 w-6 text-blue-500" />;
+        color = "bg-blue-500";
+      } else if (truthScore >= 40) {
+        verdict = "Unverified";
+        icon = <Clock className="h-6 w-6 text-yellow-500" />;
+        color = "bg-yellow-500";
+      } else if (truthScore >= 20) {
+        verdict = "Misleading";
+        icon = <AlertTriangle className="h-6 w-6 text-orange-500" />;
+        color = "bg-orange-500";
+      } else {
+        verdict = "Likely False";
+        icon = <XCircle className="h-6 w-6 text-red-500" />;
+        color = "bg-red-500";
+      }
+
+      const checkResult = {
+        verdict,
+        truthScore,
+        reasoning: apiResponse.message,
+        relatedFacts: apiResponse.relatedFacts || [],
+        icon,
+        color,
+        indicatorsFound: apiResponse.indicators || [],
+      };
+
       setResult(checkResult);
 
       // Add to recent checks
@@ -100,8 +133,8 @@ export default function FactCheckPage() {
         {
           id: Date.now(),
           title,
-          verdict: (checkResult as any).verdict,
-          icon: (checkResult as any).icon,
+          verdict: checkResult.verdict,
+          icon: checkResult.icon,
         },
         ...prev.slice(0, 4),
       ]);
@@ -154,13 +187,12 @@ export default function FactCheckPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="title">News Author</Label>
+                    <Label htmlFor="author">News Author</Label>
                     <Input
                       id="author"
                       placeholder="Enter the author of the news"
                       value={author}
                       onChange={(e) => setAuthor(e.target.value)}
-                      required
                     />
                   </div>
                   <div className="space-y-2">
@@ -243,14 +275,18 @@ export default function FactCheckPage() {
 
                   <div>
                     <h3 className="font-medium mb-2">Related Verified Facts</h3>
-                    <ul className="space-y-2">
-                      {result.relatedFacts.map((fact: string, i: number) => (
-                        <li key={i} className="flex gap-2">
-                          <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                          <span>{fact}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    {result.relatedFacts && result.relatedFacts.length > 0 ? (
+                      <ul className="space-y-2">
+                        {result.relatedFacts.map((fact: string, i: number) => (
+                          <li key={i} className="flex gap-2">
+                            <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                            <span>{fact}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-muted-foreground">No related facts available.</p>
+                    )}
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-between border-t pt-6">
@@ -258,13 +294,14 @@ export default function FactCheckPage() {
                     variant="outline"
                     onClick={() => {
                       setTitle("");
+                      setAuthor("");
                       setDescription("");
                       setResult(null);
                     }}
                   >
                     Check Another
                   </Button>
-                  <Button>Share Result</Button>
+                  {/* <Button>Share Result</Button> */}
                 </CardFooter>
               </Card>
             )}
@@ -318,11 +355,7 @@ export default function FactCheckPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p>
-                  Our fact-checking process combines advanced AI analysis with
-                  journalistic standards to evaluate the accuracy of news
-                  content. We analyze text patterns, cross-reference with
-                  verified sources, and provide a confidence score based on
-                  multiple factors.
+                  Our fact-checking process leverages OpenAI's advanced language models combined with journalistic standards to evaluate the accuracy of news content. We analyze text patterns, cross-reference with verified sources, and provide a confidence score based on multiple factors.
                 </p>
 
                 <div>
@@ -381,9 +414,9 @@ export default function FactCheckPage() {
                   <Info className="h-4 w-4" />
                   <AlertTitle>Important Note</AlertTitle>
                   <AlertDescription>
-                    This is a demonstration tool and should not be the sole
-                    basis for determining the accuracy of information. Always
-                    verify important news with multiple reputable sources.
+                    This tool uses AI to help assess information accuracy, but it should not be the sole
+                    basis for determining the veracity of news. Always
+                    verify important information with multiple reputable sources.
                   </AlertDescription>
                 </Alert>
               </CardContent>

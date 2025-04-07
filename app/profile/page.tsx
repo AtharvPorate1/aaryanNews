@@ -137,9 +137,9 @@ export default function ProfilePage() {
                   </div>
                 </div>
               </div>
-              <Button variant="outline" className="w-full">
+              {/* <Button variant="outline" className="w-full">
                 Edit Profile
-              </Button>
+              </Button> */}
             </div>
           </CardContent>
         </Card>
@@ -149,8 +149,8 @@ export default function ProfilePage() {
           <Tabs defaultValue="comments">
             <TabsList className="mb-4">
               <TabsTrigger value="comments">My Comments</TabsTrigger>
-              <TabsTrigger value="saved">Saved Articles</TabsTrigger>
-              <TabsTrigger value="history">Reading History</TabsTrigger>
+              {/* <TabsTrigger value="saved">Saved Articles</TabsTrigger>
+              <TabsTrigger value="history">Reading History</TabsTrigger> */}
             </TabsList>
 
             <TabsContent value="comments">
