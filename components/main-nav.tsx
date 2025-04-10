@@ -76,9 +76,13 @@ export function MainNav() {
       </div>
       <div className="flex items-center gap-4">
         <SignedIn>
+          
+        <UserButton/>
           <Link href="/profile">
+          
             <User2/>
           </Link>
+        
         </SignedIn>
         <SignedOut>
           <Link href="/sign-in">
